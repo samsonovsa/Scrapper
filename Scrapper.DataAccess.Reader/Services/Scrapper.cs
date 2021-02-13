@@ -13,6 +13,7 @@ namespace Scrapper.DataAccess.Reader.Services
         where TEntity: Person, new()
     {
         private readonly IPage _page;
+        private string _domen;
         private const string engineUrl = @"https://cse.google.com/cse?cx=009462381166450434430:dqo-6rxvieq";
 
         public Scrapper()
@@ -21,6 +22,7 @@ namespace Scrapper.DataAccess.Reader.Services
 
         public async Task<List<TEntity>> GetPersonsAsync(InputData inputData)
         {
+            _domen = inputData.Domain;
             string query = $"'{inputData.Keyword}' '{inputData.Location}' '{inputData.Domain}'  -intitle:'profiles' -inurl:'dir/' site:{inputData.Site}/in/";
             return await GetPersonsFromSearchEngineTrackAsync(engineUrl, query);
         }
@@ -49,11 +51,23 @@ namespace Scrapper.DataAccess.Reader.Services
                     foreach (var block in dataBlocks)
                     {
                         var entity = await GetDataAsync(page, block);
-                        if(entity != null)
+                        if(entity != null && !string.IsNullOrEmpty(entity.Url))
                             entities.Add(entity);
                     }
 
-                    await page.ClickAsync($".gsc-cursor-page[aria-label='Page {i}']", timeout);
+                    var nextButton = await page.QuerySelectorAsync($".gsc-cursor-page[aria-label='Page {i}']");
+                    if (nextButton == null)
+                        break;
+
+                    try
+                    {
+                        await page.ClickAsync($".gsc-cursor-page[aria-label='Page {i}']", timeout);
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+
                 }
             }
 
@@ -63,14 +77,23 @@ namespace Scrapper.DataAccess.Reader.Services
         private async Task<TEntity> GetDataAsync(IPage page, IElementHandle element)
         {
             var entity = new TEntity();
+            var regexEmail = new Regex($"\\S+\\.\\S+@\\S+\\.\\S+");
 
             var title = await element.QuerySelectorAsync("a.gs-title");
+            if (title == null)
+                return entity;
+
             entity.Url = await title.EvaluateAsync<string>("e => e.getAttribute('href')");
             var innerText = await element.EvaluateAsync<string>("e => e.innerText");
             entity.Description = innerText;
             entity.Name = innerText.Substring(0, innerText.IndexOf("-")).Trim();
-            //var regex = new Regex();
-            //entity.Email = 
+            foreach (var match in regexEmail.Matches(innerText))
+            {
+                if (!string.IsNullOrEmpty(entity.Email))
+                    entity.Email = ", ";
+
+                entity.Email += match.ToString();
+            } 
 
            // entity.Photo
 

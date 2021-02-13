@@ -50,7 +50,7 @@ namespace Scrapper.Shell
 
             //var parser = new GoogleParser();
             //await parser.GetSearchPage();
-
+            Console.WriteLine("Scrapping finished");
             Console.ReadKey();
         }
 

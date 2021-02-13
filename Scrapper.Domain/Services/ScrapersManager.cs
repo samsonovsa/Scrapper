@@ -1,4 +1,5 @@
-﻿using Scrapper.Domain.Interfaces;
+﻿using Scrapper.Domain.Extensions;
+using Scrapper.Domain.Interfaces;
 using Scrapper.Domain.Model;
 using System;
 using System.Collections.Generic;
@@ -79,22 +80,43 @@ namespace Scrapper.Domain.Services
                 if (isNeedToAdd(person))
                     await _dbContext.Persons.AddAsync(person);
                 else
-                    if (isNeedToUpdate(person))
+                    if (isNeedToUpdateAndChange(person))
                         _dbContext.Persons.Update(person);
             }
 
-            await _dbContext.SaveChangesAsync();
-        }
-
-        private bool isNeedToUpdate(Person person)
-        {
-            //throw new NotImplementedException();
-            return false;
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private bool isNeedToAdd(Person person)
         {
-            return !_dbContext.Persons.Any(p => p.Url.Equals(person.Url, StringComparison.InvariantCultureIgnoreCase));
+            return !_dbContext.Persons.Any(p => p.Url.ToLower().Equals(person.Url.ToLower()));
         }
+
+        private bool isNeedToUpdateAndChange(Person person)
+        {
+            var existPerson = _dbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Equals(person.Url.ToLower()));
+            if (existPerson == null)
+                return false;
+
+            if(!string.IsNullOrEmpty(existPerson.Email)
+                && !string.IsNullOrEmpty(person.Email)
+                && !isExistsEmail(existPerson.Email, person.Email))
+                    person.Email = existPerson.Email.AddWithComma(person.Email);
+
+            return true;
+        }
+
+        private bool isExistsEmail(string baseEmail, string newEmail)
+        {
+          return  baseEmail.IndexOf(newEmail)>=0;
+        }
+
+
     }
 }
