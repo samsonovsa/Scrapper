@@ -6,6 +6,6 @@ namespace Scrapper.Domain.Interfaces
 {
     public interface IScrapper
     {
-        Task<List<Person>> GetPersons(InputData inputData);
+        Task<List<Person>> GetPersonsAsync(InputData inputData);
     }
 }

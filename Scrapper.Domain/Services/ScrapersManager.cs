@@ -2,6 +2,7 @@
 using Scrapper.Domain.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -62,8 +63,8 @@ namespace Scrapper.Domain.Services
                                 Site = site,
                             };
 
-                            var persons = await _scrapper.GetPersons(inputData);
-                            await SaveAsync(persons);
+                            var persons = await _scrapper.GetPersonsAsync(inputData);
+                            await CheckAndSaveAsync(persons);
                             Notify?.Invoke(this, new ScrapperEventArgs(inputData));
                         }
                     }
@@ -71,11 +72,29 @@ namespace Scrapper.Domain.Services
             }
         }
 
-
-        private async Task SaveAsync(List<Person> persons)
+        private async Task CheckAndSaveAsync(List<Person> persons)
         {
-            await _dbContext.Persons.AddRangeAsync(persons);
+            foreach (var person in persons)
+            {
+                if (isNeedToAdd(person))
+                    await _dbContext.Persons.AddAsync(person);
+                else
+                    if (isNeedToUpdate(person))
+                        _dbContext.Persons.Update(person);
+            }
+
             await _dbContext.SaveChangesAsync();
+        }
+
+        private bool isNeedToUpdate(Person person)
+        {
+            //throw new NotImplementedException();
+            return false;
+        }
+
+        private bool isNeedToAdd(Person person)
+        {
+            return !_dbContext.Persons.Any(p => p.Url.Equals(person.Url, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }
