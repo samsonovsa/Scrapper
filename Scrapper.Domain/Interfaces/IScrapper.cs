@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace Scrapper.Domain.Interfaces
 {
-    public interface IScrapper
+    public interface IScrapper<TEntity>
     {
-        Task<List<Person>> GetPersonsAsync(InputData inputData);
+        Task<List<TEntity>> GetPersonsAsync(InputData inputData);
     }
 }

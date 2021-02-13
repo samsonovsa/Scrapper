@@ -12,12 +12,12 @@ namespace Scrapper.Domain.Services
     {
         private readonly IInputDataProvider _inputDataProvider;
         private readonly IDbContext _dbContext;
-        private readonly IScrapper _scrapper;
+        private readonly IScrapper<Person> _scrapper;
 
         public event IScrapersManager.ScrapperEventHandler Notify;
         public delegate void ScrapperEventHandler(object sender, ScrapperEventArgs e);
 
-        public ScrapersManager(IInputDataProvider inputDataProvider, IDbContext dbContext, IScrapper scrapper)
+        public ScrapersManager(IInputDataProvider inputDataProvider, IDbContext dbContext, IScrapper<Person> scrapper)
         {
             _inputDataProvider = inputDataProvider;
             _dbContext = dbContext;

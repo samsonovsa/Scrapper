@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Scrapper.DataAccess.DataBase;
 using Scrapper.DataAccess.Files;
 using Scrapper.DataAccess.Reader;
+using Scrapper.DataAccess.Reader.Services;
 using Scrapper.Domain.Interfaces;
 using Scrapper.Domain.Model;
 using Scrapper.Domain.Services;
@@ -28,9 +29,13 @@ namespace Scrapper.Shell
 
             var dbContext = new ScrapperContext(options);
             var inputData = new InputDataProvider(new FileReader());
-            IScrapper scrapper = new Scrapper();
+            await inputData.FillData();
+
+            IScrapper<Person> scrapper = new Scrapper<Person>();
             IScrapersManager scrapperManager = new ScrapersManager(inputData, dbContext, scrapper);
             scrapperManager.Notify += ScrapperManagerNotify;
+
+            await scrapperManager.ScrapLinkidinDataAsync();
 
             //using (ScrapperContext db = new ScrapperContext(options))
             //{

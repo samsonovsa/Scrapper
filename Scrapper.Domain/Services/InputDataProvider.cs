@@ -18,6 +18,7 @@ namespace Scrapper.Domain.Services
         public InputDataProvider(IFileReader fileReader)
         {
             _fileReader = fileReader;
+            Data = new InputDataLists();
         }
 
         public async Task FillData()

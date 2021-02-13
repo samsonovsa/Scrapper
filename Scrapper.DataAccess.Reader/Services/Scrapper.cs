@@ -4,11 +4,13 @@ using Scrapper.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Scrapper.DataAccess.Reader.Services
 {
-    public class Scrapper : IScrapper
+    public class Scrapper<TEntity> : IScrapper<TEntity>
+        where TEntity: Person, new()
     {
         private readonly IPage _page;
         private const string engineUrl = @"https://cse.google.com/cse?cx=009462381166450434430:dqo-6rxvieq";
@@ -17,15 +19,15 @@ namespace Scrapper.DataAccess.Reader.Services
         {
         }
 
-        public async Task<List<Person>> GetPersonsAsync(InputData inputData)
+        public async Task<List<TEntity>> GetPersonsAsync(InputData inputData)
         {
-            string query = $"'{inputData.Keyword}' '{inputData.Location}' '{inputData.Domain}'  -intitle:'profiles' -inurl:'dir/' site:{inputData.Site}";
-            await SearchEngineTrackAsync(engineUrl, query);
-
+            string query = $"'{inputData.Keyword}' '{inputData.Location}' '{inputData.Domain}'  -intitle:'profiles' -inurl:'dir/' site:{inputData.Site}/in/";
+            return await GetPersonsFromSearchEngineTrackAsync(engineUrl, query);
         }
 
-        private async Task SearchEngineTrackAsync(string url, string query)
+        private async Task<List<TEntity>> GetPersonsFromSearchEngineTrackAsync(string url, string query)
         {
+            var entities = new List<TEntity>();
             using var playwright = await Playwright.CreateAsync();
             await using var browser = await playwright.Webkit.LaunchAsync(headless: false);
             var page = await browser.NewPageAsync();
@@ -46,17 +48,33 @@ namespace Scrapper.DataAccess.Reader.Services
                     var dataBlocks = await page.QuerySelectorAllAsync(".gsc-webResult.gsc-result");
                     foreach (var block in dataBlocks)
                     {
-                        await GetDataAsync(page, block);
+                        var entity = await GetDataAsync(page, block);
+                        if(entity != null)
+                            entities.Add(entity);
                     }
 
                     await page.ClickAsync($".gsc-cursor-page[aria-label='Page {i}']", timeout);
                 }
             }
+
+            return entities;
         }
 
-        private async Task GetDataAsync(IPage page, IElementHandle element)
+        private async Task<TEntity> GetDataAsync(IPage page, IElementHandle element)
         {
+            var entity = new TEntity();
+
+            var title = await element.QuerySelectorAsync("a.gs-title");
+            entity.Url = await title.EvaluateAsync<string>("e => e.getAttribute('href')");
             var innerText = await element.EvaluateAsync<string>("e => e.innerText");
+            entity.Description = innerText;
+            entity.Name = innerText.Substring(0, innerText.IndexOf("-")).Trim();
+            //var regex = new Regex();
+            //entity.Email = 
+
+           // entity.Photo
+
+            return entity;
         }
 
         //private  IPage GetPageAsync()
