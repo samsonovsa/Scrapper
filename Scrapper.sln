@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scrapper.Domain", "Scrapper.Domain\Scrapper.Domain.csproj", "{4433449A-0C1D-4036-BA13-2646EF8C92F9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scrapper.DataAccess.DataBase", "Scrapper.DataAccess.MsSql\Scrapper.DataAccess.DataBase.csproj", "{4F067F89-CDE1-49F7-BF39-DD94D9520B16}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scrapper.DataAccess.Reader", "Scrapper.DataAccess.Reader\Scrapper.DataAccess.Reader.csproj", "{B22B3263-D691-425F-9B34-6C2A5A7EC681}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scrapper.Shell", "Scrappr.Shell\Scrapper.Shell.csproj", "{F465474E-559B-405E-ACB2-779EF2EF0A47}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scrapper.Test", "Scrapper.Test\Scrapper.Test.csproj", "{CD0A6449-A388-49CA-A54D-1DDDEC5C0300}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scrapper.DataAccess.Files", "Scrapper.DataAccess.Files\Scrapper.DataAccess.Files.csproj", "{5E99DC3F-BD63-49E3-A0AA-166D3E1C0031}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4433449A-0C1D-4036-BA13-2646EF8C92F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4433449A-0C1D-4036-BA13-2646EF8C92F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4433449A-0C1D-4036-BA13-2646EF8C92F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4433449A-0C1D-4036-BA13-2646EF8C92F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F067F89-CDE1-49F7-BF39-DD94D9520B16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F067F89-CDE1-49F7-BF39-DD94D9520B16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F067F89-CDE1-49F7-BF39-DD94D9520B16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F067F89-CDE1-49F7-BF39-DD94D9520B16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B22B3263-D691-425F-9B34-6C2A5A7EC681}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B22B3263-D691-425F-9B34-6C2A5A7EC681}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B22B3263-D691-425F-9B34-6C2A5A7EC681}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B22B3263-D691-425F-9B34-6C2A5A7EC681}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F465474E-559B-405E-ACB2-779EF2EF0A47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F465474E-559B-405E-ACB2-779EF2EF0A47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F465474E-559B-405E-ACB2-779EF2EF0A47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F465474E-559B-405E-ACB2-779EF2EF0A47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD0A6449-A388-49CA-A54D-1DDDEC5C0300}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD0A6449-A388-49CA-A54D-1DDDEC5C0300}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD0A6449-A388-49CA-A54D-1DDDEC5C0300}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD0A6449-A388-49CA-A54D-1DDDEC5C0300}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E99DC3F-BD63-49E3-A0AA-166D3E1C0031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E99DC3F-BD63-49E3-A0AA-166D3E1C0031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E99DC3F-BD63-49E3-A0AA-166D3E1C0031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E99DC3F-BD63-49E3-A0AA-166D3E1C0031}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {785F72AF-6153-4D17-9F0A-74AE217DCF4B}
+	EndGlobalSection
+EndGlobal
