@@ -5,6 +5,6 @@ namespace Scrapper.Domain.Interfaces
 {
     public interface IFileReader
     {
-        Task<List<string>> GetStrings(string fileName);
+        Task<List<string>> GetStringsAsync(string fileName);
     }
 }

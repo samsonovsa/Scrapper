@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Scrapper.DataAccess.Files\Scrapper.DataAccess.Files.csproj" />
     <ProjectReference Include="..\Scrapper.DataAccess.MsSql\Scrapper.DataAccess.DataBase.csproj" />
     <ProjectReference Include="..\Scrapper.DataAccess.Reader\Scrapper.DataAccess.Reader.csproj" />
   </ItemGroup>

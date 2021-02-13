@@ -7,7 +7,7 @@ namespace Scrapper.DataAccess.Files
 {
     public class FileReader : IFileReader
     {
-        public async Task<List<string>> GetStrings(string fileName)
+        public async Task<List<string>> GetStringsAsync(string fileName)
         {
             List<string> result = new List<string>();
 
