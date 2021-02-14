@@ -1,4 +1,5 @@
 ﻿using PlaywrightSharp;
+using Scrapper.Domain.Extensions;
 using Scrapper.Domain.Interfaces;
 using Scrapper.Domain.Model;
 using System;
@@ -13,7 +14,8 @@ namespace Scrapper.DataAccess.Reader.Services
         where TEntity: Person, new()
     {
         private readonly IPage _page;
-        private const string engineUrl = @"https://cse.google.com/cse?cx=009462381166450434430:dqo-6rxvieq";
+        // private const string engineUrl = @"https://cse.google.com/cse?cx=009462381166450434430:dqo-6rxvieq";
+        private const string engineUrl = @"https://cse.google.com/cse?cx=17ae42e883cc90181";
 
         public Scrapper()
         {
@@ -29,7 +31,7 @@ namespace Scrapper.DataAccess.Reader.Services
         {
             var entities = new List<TEntity>();
             using var playwright = await Playwright.CreateAsync();
-            await using var browser = await playwright.Webkit.LaunchAsync(headless: true);
+            await using var browser = await playwright.Webkit.LaunchAsync(headless: false);
             var page = await browser.NewPageAsync();
             await page.GoToAsync(url);
 
@@ -47,7 +49,7 @@ namespace Scrapper.DataAccess.Reader.Services
                     var dataBlocks = await page.QuerySelectorAllAsync(".gsc-webResult.gsc-result");
                     foreach (var block in dataBlocks)
                     {
-                        var entity = await GetDataAsync(page, block);
+                        var entity = await GetDataAsync(block);
                         if(entity != null && !string.IsNullOrEmpty(entity.Url))
                             entities.Add(entity);
                     }
@@ -70,7 +72,7 @@ namespace Scrapper.DataAccess.Reader.Services
             return entities;
         }
 
-        private async Task<TEntity> GetDataAsync(IPage page, IElementHandle element)
+        private async Task<TEntity> GetDataAsync(IElementHandle element)
         {
             var entity = new TEntity();
             var regexEmail = new Regex($"\\S+\\.\\S+@\\S+\\.\\S+");
@@ -85,15 +87,22 @@ namespace Scrapper.DataAccess.Reader.Services
             entity.Name = innerText.Substring(0, innerText.IndexOf("-")).Trim();
             foreach (var match in regexEmail.Matches(innerText))
             {
-                if (!string.IsNullOrEmpty(entity.Email))
-                    entity.Email = ", ";
+                entity.Email = entity.Email.AddWithComma(match.ToString());
+            }
 
-                entity.Email += match.ToString();
-            } 
-
-           // entity.Photo
+            entity.Photo =  await GetPhoto(element);
 
             return entity;
+        }
+
+        private async Task<string> GetPhoto(IElementHandle element)
+        {
+            var photoTag = await element.QuerySelectorAsync("img.gs-image");
+
+            if (photoTag != null)
+                return await photoTag.EvaluateAsync<string>("e => e.getAttribute('src')");
+            else
+                return string.Empty;
         }
     }
 }
