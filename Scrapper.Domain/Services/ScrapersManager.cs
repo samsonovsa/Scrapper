@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Scrapper.Domain.Services
 {
@@ -38,9 +39,9 @@ namespace Scrapper.Domain.Services
                 Locations = _inputDataProvider.Data.Locations,
                 Sites = _inputDataProvider.Data.Sites,
                 Domains = new List<string>
-               {
+                {
                    "t.me/"
-               }
+                }
             };
 
             await ScrapProcessAsync(telegramInputDataList);
@@ -77,6 +78,8 @@ namespace Scrapper.Domain.Services
         {
             foreach (var person in persons)
             {
+                EvaluatePerson(person);
+
                 if (isNeedToAdd(person))
                     await _dbContext.Persons.AddAsync(person);
                 else
@@ -88,9 +91,35 @@ namespace Scrapper.Domain.Services
             {
                 await _dbContext.SaveChangesAsync();
             }
-            catch (Exception)
+            catch (Exception e)
             {
             }
+        }
+
+        private void EvaluatePerson(Person person)
+        {
+            HahdleUrl(person);
+            HahdleEmail(person);
+          
+        }
+
+        private void HahdleEmail(Person person)
+        {
+            if (string.IsNullOrEmpty(person.Email))
+                return;
+
+            if (char.IsPunctuation(person.Email.Last()))
+                person.Email = person.Email.Remove(person.Email.Length - 1);
+        }
+
+        private void HahdleUrl(Person person)
+        {
+            //person.Photo = person.Url;
+
+            person.Url = person.Url.Replace(@"https://ru.linkedin.com", @"https://www.linkedin.com");
+            person.Url = person.Url.RemoveFrom("?");
+            person.Url = person.Url.RemoveFrom("/ru-ru");
+          //  person.Url = HttpUtility.UrlEncode(person.Url, Encoding.Unicode);
         }
 
         private bool isNeedToAdd(Person person)
@@ -116,7 +145,5 @@ namespace Scrapper.Domain.Services
         {
           return  baseEmail.IndexOf(newEmail)>=0;
         }
-
-
     }
 }

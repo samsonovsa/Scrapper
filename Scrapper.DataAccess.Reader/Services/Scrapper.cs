@@ -14,8 +14,7 @@ namespace Scrapper.DataAccess.Reader.Services
         where TEntity: Person, new()
     {
         private readonly IPage _page;
-        // private const string engineUrl = @"https://cse.google.com/cse?cx=009462381166450434430:dqo-6rxvieq";
-        private const string engineUrl = @"https://cse.google.com/cse?cx=17ae42e883cc90181";
+        private const string engineUrl = @"https://cse.google.com/cse?cx=009462381166450434430:dqo-6rxvieq";
 
         public Scrapper()
         {

@@ -35,5 +35,16 @@ namespace Scrapper.Domain.Extensions
 
             return baseString;
         }
+
+        public static string RemoveFrom(this string baseString, string patten)
+        {
+            int i = baseString.LastIndexOf(patten, System.StringComparison.InvariantCultureIgnoreCase);
+            if (i >= 0)
+            {
+                baseString = baseString.Remove(i);
+            }
+
+            return baseString;
+        }
     }
 }
