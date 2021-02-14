@@ -18,11 +18,10 @@ namespace Scrapper.Shell
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Выберите дальнейшее действие:");
-
-            Console.WriteLine("1 Сбор информации по доменам.");
-            Console.WriteLine("2 Сбор информации по telegram.");
-            Console.WriteLine("0 Завершение работы.");
+            //Console.WriteLine("Выберите дальнейшее действие:");
+            //Console.WriteLine("1 Сбор информации по доменам.");
+            //Console.WriteLine("2 Сбор информации по telegram.");
+            //Console.WriteLine("0 Завершение работы.");
 
             Console.WriteLine("Scrapper start:");
             var options = GetDbContextOptions();
@@ -37,19 +36,6 @@ namespace Scrapper.Shell
 
             await scrapperManager.ScrapLinkidinDataAsync();
 
-            //using (ScrapperContext db = new ScrapperContext(options))
-            //{
-            //    var persons = db.Persons.ToList();
-            //    foreach (var person in persons)
-            //    {
-            //        Console.WriteLine($"{person.Id}.{person.Name}");
-            //    }
-            //}
-
-
-
-            //var parser = new GoogleParser();
-            //await parser.GetSearchPage();
             Console.WriteLine("Scrapping finished");
             Console.ReadKey();
         }

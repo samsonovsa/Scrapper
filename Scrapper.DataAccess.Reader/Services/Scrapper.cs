@@ -13,7 +13,6 @@ namespace Scrapper.DataAccess.Reader.Services
         where TEntity: Person, new()
     {
         private readonly IPage _page;
-        private string _domen;
         private const string engineUrl = @"https://cse.google.com/cse?cx=009462381166450434430:dqo-6rxvieq";
 
         public Scrapper()
@@ -22,7 +21,6 @@ namespace Scrapper.DataAccess.Reader.Services
 
         public async Task<List<TEntity>> GetPersonsAsync(InputData inputData)
         {
-            _domen = inputData.Domain;
             string query = $"'{inputData.Keyword}' '{inputData.Location}' '{inputData.Domain}'  -intitle:'profiles' -inurl:'dir/' site:{inputData.Site}/in/";
             return await GetPersonsFromSearchEngineTrackAsync(engineUrl, query);
         }
@@ -31,7 +29,7 @@ namespace Scrapper.DataAccess.Reader.Services
         {
             var entities = new List<TEntity>();
             using var playwright = await Playwright.CreateAsync();
-            await using var browser = await playwright.Webkit.LaunchAsync(headless: false);
+            await using var browser = await playwright.Webkit.LaunchAsync(headless: true);
             var page = await browser.NewPageAsync();
             await page.GoToAsync(url);
 
@@ -40,7 +38,6 @@ namespace Scrapper.DataAccess.Reader.Services
             await page.PressAsync(searchBar, "Enter");
             await page.WaitForLoadStateAsync(LifecycleEvent.Networkidle);
 
-            var timeout = (int)TimeSpan.FromMilliseconds(500).TotalMilliseconds;
             var pageButtons = page.QuerySelectorAsync(".gsc-cursor-page");
 
             if (pageButtons != null)
@@ -61,13 +58,12 @@ namespace Scrapper.DataAccess.Reader.Services
 
                     try
                     {
-                        await page.ClickAsync($".gsc-cursor-page[aria-label='Page {i}']", timeout);
+                        await page.ClickAsync($".gsc-cursor-page[aria-label='Page {i}']");
                     }
                     catch (Exception)
                     {
-                        continue;
+                        break;
                     }
-
                 }
             }
 
@@ -99,10 +95,5 @@ namespace Scrapper.DataAccess.Reader.Services
 
             return entity;
         }
-
-        //private  IPage GetPageAsync()
-        //{
-
-        //}
     }
 }
