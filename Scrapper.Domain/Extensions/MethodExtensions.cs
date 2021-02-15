@@ -29,7 +29,7 @@ namespace Scrapper.Domain.Extensions
                 return baseString;
 
             if (!string.IsNullOrEmpty(baseString))
-                baseString = ", ";
+                baseString += ", ";
 
             baseString += additionalString;
 

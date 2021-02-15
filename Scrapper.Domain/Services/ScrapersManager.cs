@@ -79,12 +79,8 @@ namespace Scrapper.Domain.Services
             foreach (var person in persons)
             {
                 EvaluatePerson(person);
-
-                if (isNeedToAdd(person))
-                    await _dbContext.Persons.AddAsync(person);
-                else
-                    if (isNeedToUpdateAndChange(person))
-                        _dbContext.Persons.Update(person);
+                UpdateIfExist(person);
+                await AddIfNeed(person);
             }
 
             try
@@ -122,28 +118,36 @@ namespace Scrapper.Domain.Services
           //  person.Url = HttpUtility.UrlEncode(person.Url, Encoding.Unicode);
         }
 
-        private bool isNeedToAdd(Person person)
-        {
-            return !_dbContext.Persons.Any(p => p.Url.ToLower().Equals(person.Url.ToLower()));
-        }
-
-        private bool isNeedToUpdateAndChange(Person person)
+        private void UpdateIfExist(Person person)
         {
             var existPerson = _dbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Equals(person.Url.ToLower()));
             if (existPerson == null)
-                return false;
+                return;
 
             if(!string.IsNullOrEmpty(existPerson.Email)
                 && !string.IsNullOrEmpty(person.Email)
                 && !isExistsEmail(existPerson.Email, person.Email))
-                    person.Email = existPerson.Email.AddWithComma(person.Email);
+            {
+                existPerson.Email = existPerson.Email.AddWithComma(person.Email);
+            }
 
-            return true;
+            existPerson.Photo = person.Photo;
+
+            _dbContext.Persons.Update(existPerson);
+        }
+
+        private async Task AddIfNeed(Person person)
+        {
+            if (!_dbContext.Persons.Any(p => p.Url.ToLower().Equals(person.Url.ToLower()))
+                && !string.IsNullOrEmpty(person.Email))
+            {
+                await _dbContext.Persons.AddAsync(person);
+            }
         }
 
         private bool isExistsEmail(string baseEmail, string newEmail)
         {
-          return  baseEmail.IndexOf(newEmail)>=0;
+          return  baseEmail.Trim().IndexOf(newEmail.Trim(), StringComparison.InvariantCultureIgnoreCase)>=0;
         }
     }
 }
