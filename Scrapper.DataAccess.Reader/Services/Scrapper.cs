@@ -74,7 +74,6 @@ namespace Scrapper.DataAccess.Reader.Services
         private async Task<TEntity> GetDataAsync(IElementHandle element)
         {
             var entity = new TEntity();
-            var regexEmail = new Regex($"\\S+\\.\\S+@\\S+\\.\\S+");
 
             var title = await element.QuerySelectorAsync("a.gs-title");
             if (title == null)
@@ -83,11 +82,8 @@ namespace Scrapper.DataAccess.Reader.Services
             entity.Url = await title.EvaluateAsync<string>("e => e.getAttribute('href')");
             var innerText = await element.EvaluateAsync<string>("e => e.innerText");
             entity.Description = innerText;
-            entity.Name = innerText.Substring(0, innerText.IndexOf("-")).Trim();
-            foreach (var match in regexEmail.Matches(innerText))
-            {
-                entity.Email = entity.Email.AddWithComma(match.ToString());
-            }
+
+
 
             entity.Photo =  await GetPhoto(element);
 

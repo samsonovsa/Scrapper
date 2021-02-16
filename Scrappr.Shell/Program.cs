@@ -18,10 +18,10 @@ namespace Scrapper.Shell
     {
         static async Task Main(string[] args)
         {
-            //Console.WriteLine("Выберите дальнейшее действие:");
-            //Console.WriteLine("1 Сбор информации по доменам.");
-            //Console.WriteLine("2 Сбор информации по telegram.");
-            //Console.WriteLine("0 Завершение работы.");
+            Console.WriteLine("Выберите дальнейшее действие:");
+            Console.WriteLine("1 Сбор информации по доменам.");
+            Console.WriteLine("2 Сбор информации по telegram.");
+            Console.WriteLine("0 Завершение работы.");
 
             Console.WriteLine("Scrapper start:");
             var options = GetDbContextOptions();
@@ -30,8 +30,9 @@ namespace Scrapper.Shell
             var inputData = new InputDataProvider(new FileReader());
             await inputData.FillData();
 
+            IDataHandler<Person> personHandler = new PersonDataHandler<Person>(dbContext);
             IScrapper<Person> scrapper = new Scrapper<Person>();
-            IScrapersManager scrapperManager = new ScrapersManager(inputData, dbContext, scrapper);
+            IScrapersManager scrapperManager = new ScrapersManager(inputData, personHandler, scrapper);
             scrapperManager.Notify += ScrapperManagerNotify;
 
             await scrapperManager.ScrapLinkidinDataAsync();
