@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace Scrapper.Domain.Interfaces
 {
-    public interface IDataHandler<TData>
+    public interface IDataHandler<TEntity>
     {
-        Task HandleAndStoreAsync(List<TData> data);
+        Task HandleEntitiesAsync(List<TEntity> entities);
     }
 }

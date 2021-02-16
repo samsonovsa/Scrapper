@@ -10,35 +10,20 @@ using Scrapper.Domain.Extensions;
 
 namespace Scrapper.Domain.Services
 {
-    public class PersonDataHandler<T> : IDataHandler<T>
+    public sealed class PersonDataHandler<T> : BaseDataHandler<T>
         where T: Person
     {
-        private readonly IDbContext _dbContext;
         private readonly Regex regexEmail = new Regex("\\S+@[0-9a-zA-Z_]+\\.\\S{2,3}");
         private readonly Regex regexEmailWithSpaces = new Regex("\\S+\\s?@\\s?[0-9a-zA-Z_]+\\s?\\.\\s?\\S{2,3}");
 
         public PersonDataHandler(IDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+            : base(dbContext) { }
 
-        public async Task HandleAndStoreAsync(List<T> persons)
+        public override async Task HandleEntity(T person)
         {
-            foreach (var person in persons)
-            {
-                EvaluatePerson(person);
-                UpdateIfExist(person);
-                await AddIfNeed(person);
-            }
-
-            try
-            {
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            EvaluatePerson(person);
+            UpdateIfExist(person);
+            await AddIfNeed(person);
         }
 
         private void EvaluatePerson(Person person)
@@ -46,7 +31,7 @@ namespace Scrapper.Domain.Services
             ExtractEmail(person);
             HahdleEmail(person);
             HahdleUrl(person);
-            //  HahdleDescription(person);
+            // HahdleDescription(person);
         }
 
         private void HahdleDescription(Person person)
@@ -99,7 +84,7 @@ namespace Scrapper.Domain.Services
 
         private void UpdateIfExist(Person person)
         {
-            var existPerson = _dbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Equals(person.Url.ToLower()));
+            var existPerson = DbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Equals(person.Url.ToLower()));
             if (existPerson == null)
                 return;
 
@@ -112,15 +97,15 @@ namespace Scrapper.Domain.Services
 
             existPerson.Photo = person.Photo;
 
-            _dbContext.Persons.Update(existPerson);
+            DbContext.Persons.Update(existPerson);
         }
 
         private async Task AddIfNeed(Person person)
         {
-            if (!_dbContext.Persons.Any(p => p.Url.ToLower().Equals(person.Url.ToLower())))
+            if (!DbContext.Persons.Any(p => p.Url.ToLower().Equals(person.Url.ToLower())))
             // && !string.IsNullOrEmpty(person.Email))
             {
-                await _dbContext.Persons.AddAsync(person);
+                await DbContext.Persons.AddAsync(person);
             }
         }
 

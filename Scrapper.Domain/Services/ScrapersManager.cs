@@ -11,7 +11,6 @@ namespace Scrapper.Domain.Services
         private readonly IDataHandler<Person> _dataHandler;
         private readonly IScrapper<Person> _scrapper;
 
-
         public event IScrapersManager.ScrapperEventHandler Notify;
         public delegate void ScrapperEventHandler(object sender, ScrapperEventArgs e);
 
@@ -22,25 +21,9 @@ namespace Scrapper.Domain.Services
             _scrapper = scrapper;
         }
 
-        public async Task ScrapLinkidinDataAsync()
+        public async Task ScrapDataAsync()
         {
             await ScrapProcessAsync(_inputDataProvider.Data);
-        }
-
-        public async Task ScrapTlegramDataAsync()
-        {
-            var telegramInputDataList = new InputDataLists
-            {
-                Keywords = _inputDataProvider.Data.Keywords,
-                Locations = _inputDataProvider.Data.Locations,
-                Sites = _inputDataProvider.Data.Sites,
-                Domains = new List<string>
-                {
-                   "t.me/"
-                }
-            };
-
-            await ScrapProcessAsync(telegramInputDataList);
         }
 
         private async Task ScrapProcessAsync(InputDataLists inputDataLists)
@@ -62,7 +45,7 @@ namespace Scrapper.Domain.Services
                             };
 
                             var persons = await _scrapper.GetPersonsAsync(inputData);
-                            await _dataHandler.HandleAndStoreAsync(persons);
+                            await _dataHandler.HandleEntitiesAsync(persons);
                             Notify?.Invoke(this, new ScrapperEventArgs(inputData));
                         }
                     }

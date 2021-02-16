@@ -2,14 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using Scrapper.DataAccess.DataBase;
 using Scrapper.DataAccess.Files;
-using Scrapper.DataAccess.Reader;
 using Scrapper.DataAccess.Reader.Services;
 using Scrapper.Domain.Interfaces;
 using Scrapper.Domain.Model;
 using Scrapper.Domain.Services;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Scrapper.Shell
@@ -18,27 +16,61 @@ namespace Scrapper.Shell
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Выберите дальнейшее действие:");
-            Console.WriteLine("1 Сбор информации по доменам.");
-            Console.WriteLine("2 Сбор информации по telegram.");
-            Console.WriteLine("0 Завершение работы.");
-
-            Console.WriteLine("Scrapper start:");
-            var options = GetDbContextOptions();
-
-            var dbContext = new ScrapperContext(options);
-            var inputData = new InputDataProvider(new FileReader());
-            await inputData.FillData();
-
-            IDataHandler<Person> personHandler = new PersonDataHandler<Person>(dbContext);
-            IScrapper<Person> scrapper = new Scrapper<Person>();
-            IScrapersManager scrapperManager = new ScrapersManager(inputData, personHandler, scrapper);
-            scrapperManager.Notify += ScrapperManagerNotify;
-
-            await scrapperManager.ScrapLinkidinDataAsync();
+            ShowMenu();
+            await HandleMenuAsync();
 
             Console.WriteLine("Scrapping finished");
             Console.ReadKey();
+        }
+
+        private static void ShowMenu()
+        {
+            Console.WriteLine(@"Выберите дальнейшее действие:");
+            Console.WriteLine("------------------------------\n");
+            Console.WriteLine("\t1 - Сбор информации по доменам.");
+            Console.WriteLine("\t2 - Сбор информации по телефонам.");
+            Console.WriteLine("\t3 - Сбор информации по telegram.");
+            Console.WriteLine("\t0 - Завершение работы.\n");
+            Console.Write("Ваш выбор? ");
+        }
+
+
+        private static async Task HandleMenuAsync()
+        {
+            var options = GetDbContextOptions();
+            var dbContext = new ScrapperContext(options);
+            IDataHandler<Person> handler = new PersonDataHandler<Person>(dbContext);
+            InputDataProvider inputData = await InputDataProviderFactory.GetInputDataProviderForPerson();
+
+            switch (Console.ReadLine())
+            {
+                case "1":
+                    break;
+                case "2":
+                    handler = new PhoneDataHandler<Person>(dbContext);
+                    inputData = await InputDataProviderFactory.GetInputDataProviderForPhone();
+                    break;
+                case "3":
+                    handler = new TelegramDataHandler<Person>(dbContext);
+                    inputData = await InputDataProviderFactory.GetInputDataProviderForTelegram();
+                    break;
+                case "0":
+                    return;
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Start scrapping process...\n");
+
+            await RunScrappingAsync(handler, inputData);
+        }
+
+        private static async Task RunScrappingAsync(IDataHandler<Person> handler, InputDataProvider inputData)
+        {
+            IScrapper<Person> scrapper = new Scrapper<Person>();
+            IScrapersManager scrapperManager = new ScrapersManager(inputData, handler, scrapper);
+            scrapperManager.Notify += ScrapperManagerNotify;
+
+            await scrapperManager.ScrapDataAsync();
         }
 
         private static void ScrapperManagerNotify(object sender, ScrapperEventArgs e)

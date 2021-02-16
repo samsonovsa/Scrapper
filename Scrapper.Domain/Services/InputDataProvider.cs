@@ -21,7 +21,7 @@ namespace Scrapper.Domain.Services
             Data = new InputDataLists();
         }
 
-        public async Task FillData()
+        public virtual async Task FillData()
         {
             try
             {
@@ -30,9 +30,9 @@ namespace Scrapper.Domain.Services
                 Data.Domains = await _fileReader.GetStringsAsync(DomainFileName);
                 Data.Sites = await _fileReader.GetStringsAsync(LinkedinFileName);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception("Ошибка чтения файла", e);
             }
         }
     }
