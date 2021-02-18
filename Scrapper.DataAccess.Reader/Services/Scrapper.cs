@@ -82,9 +82,6 @@ namespace Scrapper.DataAccess.Reader.Services
             entity.Url = await title.EvaluateAsync<string>("e => e.getAttribute('href')");
             var innerText = await element.EvaluateAsync<string>("e => e.innerText");
             entity.Description = innerText;
-
-
-
             entity.Photo =  await GetPhoto(element);
 
             return entity;

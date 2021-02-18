@@ -16,6 +16,8 @@ namespace Scrapper.Domain.Services
 
         public async Task HandleEntitiesAsync(List<T> entities)
         {
+            entities = PreprocessingEntities(entities);
+
             foreach (var entity in entities)
             {
                await HandleEntity(entity);
@@ -30,6 +32,8 @@ namespace Scrapper.Domain.Services
                 Console.WriteLine(e.Message);
             }
         }
+
+        public abstract List<T> PreprocessingEntities(List<T> entities);
 
         public abstract Task HandleEntity(T entity);
     }

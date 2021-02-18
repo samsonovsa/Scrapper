@@ -47,7 +47,7 @@ namespace Scrapper.Shell
                 case "1":
                     break;
                 case "2":
-                    handler = new PhoneDataHandler<Person>(dbContext);
+                   // handler = new PhoneDataHandler<Person>(dbContext);
                     inputData = await InputDataProviderFactory.GetInputDataProviderForPhone();
                     break;
                 case "3":

@@ -1,4 +1,5 @@
-﻿using Scrapper.Domain.Interfaces;
+﻿using Scrapper.Domain.Extensions;
+using Scrapper.Domain.Interfaces;
 using Scrapper.Domain.Model;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,11 @@ namespace Scrapper.Domain.Services
     {
         public TelegramDataHandler(IDbContext dbContext)
             : base(dbContext) { }
+
+        public override List<T> PreprocessingEntities(List<T> entities)
+        {
+            return entities.Distinct(new PersonComparer<T>()).ToList();
+        }
 
         public override async Task HandleEntity(T person)
         {
@@ -61,10 +67,7 @@ namespace Scrapper.Domain.Services
                         WebSiteUrl = telegramUrl
                     });
                 }
-
             }
         }
-
-
     }
 }

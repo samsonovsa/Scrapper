@@ -10,28 +10,34 @@ using Scrapper.Domain.Extensions;
 
 namespace Scrapper.Domain.Services
 {
-    public sealed class PersonDataHandler<T> : BaseDataHandler<T>
+    public class PersonDataHandler<T> : BaseDataHandler<T>
         where T: Person
     {
         private readonly Regex regexEmail = new Regex("\\S+@[0-9a-zA-Z_]+\\.\\S{2,3}");
         private readonly Regex regexEmailWithSpaces = new Regex("\\S+\\s?@\\s?[0-9a-zA-Z_]+\\s?\\.\\s?\\S{2,3}");
+        private readonly Regex regexPhone = new Regex("(((8|\\+7)[\\- ]?)?(\\(?\\d{3}\\)?[\\- ]?)?[\\d\\- ]){10,15}");
 
         public PersonDataHandler(IDbContext dbContext)
             : base(dbContext) { }
 
+        public override List<T> PreprocessingEntities(List<T> entities)
+        {
+            return entities.Distinct(new PersonComparer<T>()).ToList();
+        }
+
         public override async Task HandleEntity(T person)
         {
             EvaluatePerson(person);
-            UpdateIfExist(person);
-            await AddIfNeed(person);
+            await AddOrUpdateIfNeed(person);
         }
 
-        private void EvaluatePerson(Person person)
+        public void EvaluatePerson(Person person)
         {
+            ExtractPhone(person);
             ExtractEmail(person);
             HahdleEmail(person);
             HahdleUrl(person);
-            // HahdleDescription(person);
+            HahdleDescription(person);
         }
 
         private void HahdleDescription(Person person)
@@ -49,13 +55,18 @@ namespace Scrapper.Domain.Services
 
         }
 
-        private void HahdleEmail(Person person)
+        public void ExtractPhone(Person person)
         {
-            if (string.IsNullOrEmpty(person.Email))
-                return;
+            foreach (var match in regexPhone.Matches(person.Description))
+            {
+                var phone = match.ToString().Trim();
+       
+                //if (person.Url.Trim().IndexOf(phone.Trim(), StringComparison.InvariantCultureIgnoreCase) >= 0)
+                //    return;
 
-            if (char.IsPunctuation(person.Email.Last()))
-                person.Email = person.Email.Remove(person.Email.Length - 1);
+                if( !isExists(person.Phone, phone))
+                    person.Phone = person.Phone.AddWithComma(match.ToString().Trim());
+            }
         }
 
         private void ExtractEmail(Person person)
@@ -73,6 +84,15 @@ namespace Scrapper.Domain.Services
                 }
         }
 
+        private void HahdleEmail(Person person)
+        {
+            if (string.IsNullOrEmpty(person.Email))
+                return;
+
+            if (char.IsPunctuation(person.Email.Last()))
+                person.Email = person.Email.Remove(person.Email.Length - 1);
+        }
+
         private void HahdleUrl(Person person)
         {
             // person.UrlComparison = person.Url;
@@ -82,36 +102,51 @@ namespace Scrapper.Domain.Services
             //  person.Url = HttpUtility.UrlEncode(person.Url, Encoding.Unicode);
         }
 
-        private void UpdateIfExist(Person person)
+        private async Task AddOrUpdateIfNeed(Person person)
         {
-            var existPerson = DbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Equals(person.Url.ToLower()));
+            var existPerson = DbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Trim().Equals(person.Url.ToLower().Trim()));
             if (existPerson == null)
-                return;
+            {
+               await Add(person);
+            }
+            else
+            {
+                Update(person, existPerson);
+            }
+        }
 
+        private void Update(Person person, Person existPerson)
+        {
             if (!string.IsNullOrEmpty(existPerson.Email)
                 && !string.IsNullOrEmpty(person.Email)
-                && !isExistsEmail(existPerson.Email, person.Email))
+                && !isExists(existPerson.Email, person.Email))
             {
                 existPerson.Email = existPerson.Email.AddWithComma(person.Email);
             }
 
+            if (!string.IsNullOrEmpty(existPerson.Phone)
+                && !string.IsNullOrEmpty(person.Phone)
+                && !isExists(existPerson.Phone, person.Phone))
+            {
+                existPerson.Phone = existPerson.Phone.AddWithComma(person.Phone);
+            }
             existPerson.Photo = person.Photo;
 
             DbContext.Persons.Update(existPerson);
         }
 
-        private async Task AddIfNeed(Person person)
-        {
-            if (!DbContext.Persons.Any(p => p.Url.ToLower().Equals(person.Url.ToLower())))
-            // && !string.IsNullOrEmpty(person.Email))
-            {
+        private async Task Add(Person person)
+        { 
+           if ((!string.IsNullOrEmpty(person.Email) || !string.IsNullOrEmpty(person.Phone)))
                 await DbContext.Persons.AddAsync(person);
-            }
         }
 
-        private bool isExistsEmail(string baseEmail, string newEmail)
+        private bool isExists(string baseString, string newString)
         {
-            return baseEmail.Trim().IndexOf(newEmail.Trim(), StringComparison.InvariantCultureIgnoreCase) >= 0;
+            if (string.IsNullOrEmpty(baseString))
+                return false;
+
+            return baseString.Trim().IndexOf(newString.Trim(), StringComparison.InvariantCultureIgnoreCase) >= 0;
         }
     }
 }
