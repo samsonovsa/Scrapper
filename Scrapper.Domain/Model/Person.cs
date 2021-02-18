@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Scrapper.Domain.Model
@@ -19,5 +20,7 @@ namespace Scrapper.Domain.Model
         public string Location { get; set; }
         [MaxLength(500)]
         public string UrlComparison { get; set; }
+
+        public List<WebSite> WebSites { get; set; } = new List<WebSite>();
     }
 }

@@ -1,24 +1,15 @@
-﻿using Scrapper.Domain.Extensions;
-using Scrapper.Domain.Interfaces;
+﻿using Scrapper.Domain.Interfaces;
 using Scrapper.Domain.Model;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Scrapper.Domain.Services
 {
-    public sealed class TelegramDataHandler<T> : BaseDataHandler<T>
+    public sealed class TelegramDataHandler<T> : PersonDataHandler<T>
         where T : Person
     {
         public TelegramDataHandler(IDbContext dbContext)
             : base(dbContext) { }
-
-        public override List<T> PreprocessingEntities(List<T> entities)
-        {
-            return entities.Distinct(new PersonComparer<T>()).ToList();
-        }
 
         public override async Task HandleEntity(T person)
         {
@@ -47,10 +38,14 @@ namespace Scrapper.Domain.Services
 
         private async Task UpdateIfExistPersonAsync(Person person, string telegramUrl)
         {
-            var existPerson = DbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Equals(person.Url.ToLower()));
+            if (string.IsNullOrEmpty(telegramUrl))
+                return;
 
-            if (existPerson != null
-                 && !string.IsNullOrEmpty(telegramUrl))
+            var existPerson = DbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Equals(person.Url.ToLower()));
+            if (existPerson == null)
+                existPerson = await AddPerson(person);
+
+            if (existPerson != null)
             {
                 var site = DbContext.WebSites.FirstOrDefault(s => s.CandidateId == existPerson.Id);
                 if(site != null)
@@ -62,12 +57,19 @@ namespace Scrapper.Domain.Services
                 {
                     await DbContext.WebSites.AddAsync(new WebSite 
                     { 
-                        CandidateId = existPerson.Id,
+                        Person = person,
                         WebSiteName = "Telegram",
                         WebSiteUrl = telegramUrl
                     });
                 }
             }
+        }
+
+        private async Task<Person> AddPerson(Person person)
+        {
+            EvaluatePerson(person);
+            await DbContext.Persons.AddAsync(person);
+            return person;
         }
     }
 }

@@ -16,6 +16,8 @@ namespace Scrapper.Domain.Services
         private readonly Regex regexEmail = new Regex("\\S+@[0-9a-zA-Z_]+\\.\\S{2,3}");
         private readonly Regex regexEmailWithSpaces = new Regex("\\S+\\s?@\\s?[0-9a-zA-Z_]+\\s?\\.\\s?\\S{2,3}");
         private readonly Regex regexPhone = new Regex("(((8|\\+7)[\\- ]?)?(\\(?\\d{3}\\)?[\\- ]?)?[\\d\\- ]){10,15}");
+        //private readonly Regex regexPhone = new Regex("((\\+?7|8)[ \\-] ?)?((\\(\\d{3}\\))|(\\d{3}))?([ \\-])?(\\d{ 3}[\\- ]?\\d{ 2}[\\- ]?\\d{ 2})");
+       
 
         public PersonDataHandler(IDbContext dbContext)
             : base(dbContext) { }
@@ -60,11 +62,11 @@ namespace Scrapper.Domain.Services
             foreach (var match in regexPhone.Matches(person.Description))
             {
                 var phone = match.ToString().Trim();
-       
-                //if (person.Url.Trim().IndexOf(phone.Trim(), StringComparison.InvariantCultureIgnoreCase) >= 0)
-                //    return;
 
-                if( !isExists(person.Phone, phone))
+                if (person.Url.Trim().IndexOf(phone.Trim(), StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    return;
+
+                if ( !isExists(person.Phone, phone))
                     person.Phone = person.Phone.AddWithComma(match.ToString().Trim());
             }
         }
