@@ -14,6 +14,8 @@ namespace Scrapper.Shell
 {
     class Program
     {
+        private static readonly string settingsFileName = "appsettings.json";
+
         static async Task Main(string[] args)
         {
             ShowMenu();
@@ -37,7 +39,8 @@ namespace Scrapper.Shell
 
         private static async Task HandleMenuAsync()
         {
-            var options = GetDbContextOptions();
+            var configuration = GetConfiguration(settingsFileName);
+            var options = GetDbContextOptions(configuration);
             var dbContext = new ScrapperContext(options);
             IDataHandler<Person> handler = new PersonDataHandler<Person>(dbContext);
             InputDataProvider inputData = await InputDataProviderFactory.GetInputDataProviderForPerson();
@@ -47,12 +50,13 @@ namespace Scrapper.Shell
                 case "1":
                     break;
                 case "2":
-                   // handler = new PhoneDataHandler<Person>(dbContext);
-                    inputData = await InputDataProviderFactory.GetInputDataProviderForPhone();
+                    string PhoneTemplate = configuration[nameof(PhoneTemplate)];
+                    inputData = await InputDataProviderFactory.GetInputDataProviderForPersonWithSpecialDomen(PhoneTemplate);
                     break;
                 case "3":
+                    string SiteTemplate = configuration[nameof(SiteTemplate)];
                     handler = new TelegramDataHandler<Person>(dbContext);
-                    inputData = await InputDataProviderFactory.GetInputDataProviderForTelegram();
+                    inputData = await InputDataProviderFactory.GetInputDataProviderForPersonWithSpecialDomen(SiteTemplate);
                     break;
                 case "0":
                     return;
@@ -86,9 +90,8 @@ namespace Scrapper.Shell
                 .Build();
         }
 
-        private static DbContextOptions<ScrapperContext> GetDbContextOptions()
+        private static DbContextOptions<ScrapperContext> GetDbContextOptions(IConfiguration configuration)
         {
-            var configuration = GetConfiguration("appsettings.json");
             string connectionString = configuration.GetConnectionString("DefaultConnection");
 
             var optionsBuilder = new DbContextOptionsBuilder<ScrapperContext>();

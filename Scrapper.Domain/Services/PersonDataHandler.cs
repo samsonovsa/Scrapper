@@ -150,5 +150,11 @@ namespace Scrapper.Domain.Services
 
             return baseString.Trim().IndexOf(newString.Trim(), StringComparison.InvariantCultureIgnoreCase) >= 0;
         }
+
+        private Person GetPersonFormDbContext(Person person)
+        {
+            return DbContext.Persons.FirstOrDefault(
+                p => p.Url.Trim().Equals(person.Url.Trim(), System.StringComparison.InvariantCultureIgnoreCase));
+        }
     }
 }

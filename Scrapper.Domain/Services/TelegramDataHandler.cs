@@ -1,6 +1,7 @@
 ﻿using Scrapper.Domain.Interfaces;
 using Scrapper.Domain.Model;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Scrapper.Domain.Services
@@ -8,6 +9,7 @@ namespace Scrapper.Domain.Services
     public sealed class TelegramDataHandler<T> : PersonDataHandler<T>
         where T : Person
     {
+
         public TelegramDataHandler(IDbContext dbContext)
             : base(dbContext) { }
 
@@ -20,13 +22,19 @@ namespace Scrapper.Domain.Services
         private string GetTelegramUrl(Person person)
         {
             string resultUrl = string.Empty;
-            string beginUrl = "https://t.me/";
+            //string beginUrl = "https://t.me/";
+            string beginUrl = "t.me/";
+            //Regex regexSite = new Regex($"{beginUrl}S+");
+            //resultUrl = regexSite.Match(person.Description).ToString().Trim();
+
             int indexOfStartUrl = person.Description.IndexOf(beginUrl);
             int indexOfSpace = 0;
 
             if (indexOfStartUrl > 1)
             {
                 indexOfSpace = person.Description.IndexOf(" ", indexOfStartUrl);
+                if(indexOfSpace < 0)
+                    indexOfSpace = person.Description.IndexOf("...", indexOfStartUrl);
 
                 var urlLength = indexOfSpace - indexOfStartUrl;
                 if (indexOfStartUrl > 1 && urlLength > 0)
@@ -41,7 +49,10 @@ namespace Scrapper.Domain.Services
             if (string.IsNullOrEmpty(telegramUrl))
                 return;
 
-            var existPerson = DbContext.Persons.FirstOrDefault(p => p.Url.ToLower().Equals(person.Url.ToLower()));
+            telegramUrl = "http://" + telegramUrl;
+
+            EvaluatePerson(person);
+            var existPerson = GetPersonFormDbContext(person);
             if (existPerson == null)
                 existPerson = await AddPerson(person);
 
@@ -67,9 +78,14 @@ namespace Scrapper.Domain.Services
 
         private async Task<Person> AddPerson(Person person)
         {
-            EvaluatePerson(person);
             await DbContext.Persons.AddAsync(person);
             return person;
+        }
+
+        private Person GetPersonFormDbContext(Person person)
+        {
+            return DbContext.Persons.FirstOrDefault(
+                p => p.Url.ToLower().Trim().Equals(person.Url.ToLower().Trim()));
         }
     }
 }

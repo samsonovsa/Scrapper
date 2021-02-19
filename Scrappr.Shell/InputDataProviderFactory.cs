@@ -20,18 +20,10 @@ namespace Scrapper.Shell
             return await GetInputDataProvider();
         }
 
-        public static async Task<InputDataProvider> GetInputDataProviderForTelegram()
+        public static async Task<InputDataProvider> GetInputDataProviderForPersonWithSpecialDomen(string domen)
         {
             var inputData = await GetInputDataProvider();
-            inputData.Data.Domains = new List<string> { "t.me/" };
-
-            return inputData;
-        }
-
-        public static async Task<InputDataProvider> GetInputDataProviderForPhone()
-        {
-            var inputData = await GetInputDataProvider();
-            inputData.Data.Domains = new List<string> { "+7" };
+            inputData.Data.Domains = new List<string> { domen };
 
             return inputData;
         }

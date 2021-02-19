@@ -18,7 +18,7 @@ namespace Scrapper.Domain.Extensions
             if (Object.ReferenceEquals(firsPerson, null) || Object.ReferenceEquals(secondPerson, null))
                 return false;
 
-            return firsPerson.Url.Equals(secondPerson.Url);
+            return firsPerson.Url.Equals(secondPerson.Url, StringComparison.InvariantCultureIgnoreCase);
         }
 
         public int GetHashCode([DisallowNull] T person)
