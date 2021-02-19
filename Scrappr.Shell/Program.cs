@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using log4net;
+using log4net.Config;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Scrapper.DataAccess.DataBase;
 using Scrapper.DataAccess.Files;
@@ -8,6 +10,7 @@ using Scrapper.Domain.Model;
 using Scrapper.Domain.Services;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Scrapper.Shell
@@ -15,6 +18,7 @@ namespace Scrapper.Shell
     class Program
     {
         private static readonly string settingsFileName = "appsettings.json";
+        private static readonly string configLoggingFileName = "log4net.config";
 
         static async Task Main(string[] args)
         {
@@ -70,8 +74,12 @@ namespace Scrapper.Shell
 
         private static async Task RunScrappingAsync(IDataHandler<Person> handler, InputDataProvider inputData)
         {
+            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+            XmlConfigurator.Configure(logRepository, new FileInfo(configLoggingFileName));
+            ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
             IScrapper<Person> scrapper = new Scrapper<Person>();
-            IScrapersManager scrapperManager = new ScrapersManager(inputData, handler, scrapper);
+            IScrapersManager scrapperManager = new ScrapersManager(inputData, handler, scrapper, log);
             scrapperManager.Notify += ScrapperManagerNotify;
 
             await scrapperManager.ScrapDataAsync();

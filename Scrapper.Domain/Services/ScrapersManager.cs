@@ -2,6 +2,7 @@
 using Scrapper.Domain.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using log4net;
 
 namespace Scrapper.Domain.Services
 {
@@ -10,15 +11,17 @@ namespace Scrapper.Domain.Services
         private readonly IInputDataProvider _inputDataProvider;
         private readonly IDataHandler<Person> _dataHandler;
         private readonly IScrapper<Person> _scrapper;
+        private readonly ILog _log;
 
         public event IScrapersManager.ScrapperEventHandler Notify;
         public delegate void ScrapperEventHandler(object sender, ScrapperEventArgs e);
 
-        public ScrapersManager(IInputDataProvider inputDataProvider, IDataHandler<Person> dataHandler, IScrapper<Person> scrapper)
+        public ScrapersManager(IInputDataProvider inputDataProvider, IDataHandler<Person> dataHandler, IScrapper<Person> scrapper, ILog log)
         {
             _inputDataProvider = inputDataProvider;
             _dataHandler = dataHandler;
             _scrapper = scrapper;
+            _log = log;
         }
 
         public async Task ScrapDataAsync()
@@ -47,6 +50,7 @@ namespace Scrapper.Domain.Services
                             var persons = await _scrapper.GetPersonsAsync(inputData);
                             await _dataHandler.HandleEntitiesAsync(persons);
                             Notify?.Invoke(this, new ScrapperEventArgs(inputData));
+                            _log.Info(inputData.ToString());
                         }
                     }
                 }

@@ -7,6 +7,7 @@ using Scrapper.Domain.Model;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Scrapper.Domain.Extensions;
+using System.Web;
 
 namespace Scrapper.Domain.Services
 {
@@ -97,11 +98,10 @@ namespace Scrapper.Domain.Services
 
         private void HahdleUrl(Person person)
         {
-            // person.UrlComparison = person.Url;
-            person.Url = person.Url.Replace(@"https://ru.linkedin.com", @"https://www.linkedin.com");
-            person.Url = person.Url.RemoveFrom("?");
-            person.Url = person.Url.RemoveFrom("/ru-ru");
-            //  person.Url = HttpUtility.UrlEncode(person.Url, Encoding.Unicode);
+            person.Url = Uri.UnescapeDataString(person.Url
+                .Replace(@"https://ru.linkedin.com", @"https://www.linkedin.com")
+                .RemoveFrom("?")
+                .RemoveFrom("/ru-ru"));
         }
 
         private async Task AddOrUpdateIfNeed(Person person)

@@ -29,7 +29,6 @@ namespace Scrapper.Domain.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
             }
         }
 
